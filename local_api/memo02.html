@@ -66,8 +66,9 @@ $("#save").on("click", function() {
   
 
   //リクエストを送るurlを準備
-  const url =`Origin: https://ap.mextractr.net/ma9/emotion_analyzer?out=json&apikey=A01B9C7259FDEFFD5FD68A3F27CD46B9B6C10A68&text=%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF`;
-
+  
+  //emoAPIkeyの場所//
+  
     axios.get(url)
    .then(function (response){
      console.log(response);

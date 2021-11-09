@@ -97,10 +97,10 @@
     <div class="ottu">今日もお疲れ様でした✨</div>
     <div class="btn"><a href="#" class="check">思い出Click!</a></div>
   </div>
-
+<!-- APIkeyの場所 -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src='https://www.bing.com/api/maps/mapcontrol?key=AkMwd6VZPXhg2zk0VeW071SnrlvEu5eP5EgTx3hD2Kd0Wxx3RbinDk9DCq3mN2J8' async defer></script>
+  
   <script>
 
 //メモしたところのテキスト読み取って
@@ -164,7 +164,7 @@ function mapsInit(position){
   const lng = position.coords.longitude;
 
 //天気の情報※位置情報の後に！！
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=b11c6f7e443df3b18b15f1cf4fb0ecb8`;
+//  weatherAPIkeyの場所  //
   axios.get(url)
     .then(function (response) {
       console.log(response);
