@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>myMemoPad中級</title>
+  <link rel="stylesheet" href="css/sample.css">
+</head>
+
+<body>
+  <header>
+    <h1>あるある日記</h1>
+  </header>
+
+  <main>
+    <!-- textに入ったものをinputという名前で入れる -->
+    <input type="text" id="input">
+    <!-- input tipeにtextareaという -->
+    <textarea id="text_area"></textarea>
+    <ul>
+      <li id="save">Save</li>
+      <li id="clear">Clear</li>
+    </ul>
+    <div class="diary">diary</div>
+    <div class="map">map</div>
+  </main>
+  
+  <footer>
+    <small>G's</small>
+  </footer>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  
+  <script>
+
+/////////////////////データlocalstrageの話///////////////
+//サーバーが引っかかって進めない問題
+axios.get('http://ap.mextractr.net/ma9/emotion_analyzer', { 
+  withCredentials: true
+});
+
+axios.defaults.withCredentials = true; // global に設定してしまう場合
+
+
+////////
+// データ取得
+$("#save").on("click", function() {
+  // inputの内容をtitle,textに保存する
+    const title = $("#input").val();
+    const text = $("#text_area").val();
+    const data = {
+      title : title,
+      text : text,
+    };
+    console.log(data);
+    // JSON形式に変換
+      const jsonData = JSON.stringify(data);
+    // ローカルストレージに保存
+      localStorage.setItem("memo", jsonData);
+
+//データ取得したら判定
+//取ったテキストで感情の情報をとる
+//取ってきた感情の情報で色をかえる。
+  
+
+  //リクエストを送るurlを準備
+  const url =`Origin: https://ap.mextractr.net/ma9/emotion_analyzer?out=json&apikey=A01B9C7259FDEFFD5FD68A3F27CD46B9B6C10A68&text=%E3%81%93%E3%82%93%E3%81%AB%E3%81%A1%E3%81%AF`;
+
+    axios.get(url)
+   .then(function (response){
+     console.log(response);
+   })
+   .catch(function(error){
+     console.log(error);
+    });
+   
+
+});
+  // データ削除 = 初級と一緒
+  $("#clear").on("click", function(){
+  // memoの内容を削除する
+    localStorage.removeItem("memo");
+  // テキストエリアに””として表示
+    $("#text_area").val("");
+    $("#input").val("");
+  });
+
+// 読み込み時に
+  // ローカルストレージからJson形式のデータ取得
+   if(localStorage.getItem("memo")){
+     
+// Json形式から取り出してJsonDataに入れ込む
+   const jsonData =localStorage.getItem("memo");
+//  JSON形式をオブジェクトに{}に変換
+   const data =JSON.parse(jsonData);
+
+// 出力
+  $('#input').val(data.title);
+  $('#text_area').val(data.text);
+
+
+
+  
+
+
+
+// // エラーを発見する
+//     console.log(data);
+  }
+  </script>
+
+</body>
+
+</html>

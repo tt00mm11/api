@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>現在地の取得</title>
+</head>
+
+<body>
+  <h1>位置情報取得</h1>
+  <div id="output">
+    <p>now loading...</p>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script>
+//成功した時の関数
+function showPosition(position){
+  console.log(position);
+  $("#output").html(`<p>latitude: ${position.coords.latitude}</p><p>longitude: ${position.coords.longitude}</p>`)//緯度経度表示
+}
+//エラーの時
+  function showError(error){
+    const errorMessage = [
+    "位置情報が許可されてません",
+    "現在位置を特定できません",
+    "位置情報を取得する前にタイムアウトになりました",
+    ];
+    alert(`error:${errorMessages[error.code - 1]}`);
+    console.log(error);
+  }
+
+  const option = {
+  enableHighAccuracy: true,
+  maximumAge: 20000,
+  timeout: 1000000,
+};
+navigator.geolocation.getCurrentPosition(showPosition, showError, option);//情報取得
+
+
+  </script>
+
+</body>
+
+</html>

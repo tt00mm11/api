@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>API</title>
+ 
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-image: url(../map/img/sozai_image_135297.png),url(../map/img/IMG_9638-cutout.png);
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    h1{
+      text-align: center;
+      color: rgb(113, 113, 113);
+      font-family: serif;
+    }
+    h2{
+      text-align: center;
+      color: rgb(113, 113, 113);
+      font-family: serif;
+    }
+    #map {
+      height: calc(50% - 102px);
+      margin: 0;
+      padding: 0;
+    }
+    #textarea {
+    margin: 3%;
+    width: 95%;
+    height: 150px;
+    font-size:22px;
+    font-family: serif;
+    color: rgb(113, 113, 113);
+    box-shadow: 3px 3px 3px 3px #555;
+    background: rgba(0,157,255,-0.5);
+    }
+    .last {
+      display: flex;
+      justify-content: space-between;
+      color: rgb(113, 113, 113);
+      font-family: serif;
+    }
+    div {
+      margin-top:auto
+    }
+    .ottu {
+      text-align: center;
+      color: rgb(113, 113, 113);
+      font-family: serif;
+      font-size: larger;
+    }
+    
+    a.check{
+      position: relative;
+      display: inline-block;
+      border-bottom: 2px dotted;
+      padding: 0.5rem 2.6rem 0.5rem 0.5rem;
+      transition: all 0.3s;
+      color: #614f38;
+    }
+    a.check:before {
+      content: "";
+      position: absolute;
+      right: 5px;
+      bottom: 0;
+      width: 0;
+      height: 0;
+      bottom: 40%;
+      border-left: 5px solid black;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      transition: all 0.3s;
+      }
+      a.check:hover:before {
+        right: 0;
+      };
+
+  </style>
+</head>
+
+<body>
+  <h1>Diary&気分</h1>
+  <div class="memo"><textarea id ="textarea"></textarea></div>
+  <h2>位置情報&Map</h2>
+  <div id="map"></div>
+  <div class="last">
+    <div class="img"><img src="img/IMG_0082-cutout.png" width="160px" height="100px"></div>
+    <div class="ottu">今日もお疲れ様でした✨</div>
+    <div class="btn"><a href="#" class="check">思い出Click!</a></div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src='https://www.bing.com/api/maps/mapcontrol?key=AkMwd6VZPXhg2zk0VeW071SnrlvEu5eP5EgTx3hD2Kd0Wxx3RbinDk9DCq3mN2J8' async defer></script>
+  <script>
+
+//メモしたところのテキスト読み取って
+//APIで感情分析して
+//ポイントごとで背景色変わる
+
+
+///////
+// データ取得
+$("a.check").on("click", function() {
+  // inputの内容をtitle,textに保存する
+    const text = $("#textarea").val();
+    const data = {
+      text : text,
+    };
+    console.log(data);
+    // JSON形式に変換
+      const jsonData = JSON.stringify(data);
+    // ローカルストレージに保存
+      localStorage.setItem("memo", jsonData);
+});
+
+
+let map;
+
+//ピンを立てる関数の定義
+function pushPin(lat, lng, map) {
+  const location = new Microsoft.Maps.Location(lat, lng);
+  const pin = new Microsoft.Maps.Pushpin(location, {
+    color: "navy",
+    visible: true,
+  });
+  map.entities.push(pin);
+}
+
+//Infoboxを生成する関数の定義//
+function generateInfobox(lat, lng, map, title, description, temp, humidity) {//引数
+//引数を代入
+const location = new Microsoft.Maps.Location(lat, lng);
+const infobox = new Microsoft.Maps.Infobox(location, {
+  title: title,
+  description:description, 
+  actions: [{    //ここから
+          label: "気温",
+          eventHandler: function () {
+          alert(Math.ceil(temp - 273.15) + '℃');
+          }
+        }, {    
+          label: "  湿度",
+          eventHandler: function () {
+          alert(Math.ceil(humidity) + "%");
+          }
+        }]    //ここまで追加
+});
+infobox.setMap(map);
+}
+
+//ここに地図を表示する処理を追加する
+function mapsInit(position){
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
+
+//天気の情報※位置情報の後に！！
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=b11c6f7e443df3b18b15f1cf4fb0ecb8`;
+  axios.get(url)
+    .then(function (response) {
+      console.log(response);
+      
+      //取ってきた値を入れ込む
+      const main = response.data.weather[0].main;
+      const description = response.data.weather[0].description;
+      const temp = response.data.main.temp;
+      $("#temp").html(Math.ceil(temp-273.15)+"℃");
+      const humidity = response.data.main.humidity;
+    
+    
+      map = new Microsoft.Maps.Map("#map", {
+        center: {
+          latitude: lat,
+          longitude: lng,
+        },
+        zoom: 20,
+      });
+      //mapを表示した後にピンを立てる関数の実行
+      pushPin(lat, lng, map);
+      //Infoboxを生成する関数の実行
+      generateInfobox(lat, lng, map, main, description, temp, humidity);
+    })
+  .catch(function (error) {
+  console.log(error);
+});
+}
+
+//エラーの時
+function showError(error){
+  const errorMessage = [
+  "位置情報が許可されてません",
+  "現在位置を特定できません",
+  "位置情報を取得する前にタイムアウトになりました",
+  ]
+  alert(`error:${errorMessages[error.code - 1]}`);
+  console.log(error);
+}
+
+const option = {
+enableHighAccuracy: true,
+maximumAge: 20000,
+timeout: 1000000,
+}
+
+window.onload = function () {
+navigator.geolocation.getCurrentPosition(mapsInit, showError, option);
+};
+
+  </script>
+
+</body>
+
+</html>

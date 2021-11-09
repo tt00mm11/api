@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>位置情報取得&map表示＋天気&感情表示</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      height: calc(100% - 102px);
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>位置情報取得&Map表示</h1>
+  <div id="map"></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src='https://www.bing.com/api/maps/mapcontrol?key=AkMwd6VZPXhg2zk0VeW071SnrlvEu5eP5EgTx3hD2Kd0Wxx3RbinDk9DCq3mN2J8' async defer></script>
+  <script>
+
+
+    let map;
+
+  //ピンを立てる関数の定義
+  function pushPin(lat, lng, map) {
+    const location = new Microsoft.Maps.Location(lat, lng);
+    const pin = new Microsoft.Maps.Pushpin(location, {
+      color: "navy",
+      visible: true,
+    });
+    map.entities.push(pin);
+  }
+
+  //Infoboxを生成する関数の定義//
+  function generateInfobox(lat, lng, map, title) {
+  const location = new Microsoft.Maps.Location(lat, lng);
+  const infobox = new Microsoft.Maps.Infobox(location, {
+    title: title,
+    description: "Where am I!!?",
+  });
+  infobox.setMap(map);
+  }
+
+  //ここに地図を表示する処理を追加する
+  function mapsInit(position){
+    console.log(position);//確認
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+
+  //天気の情報※位置情報の後に！！
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=b11c6f7e443df3b18b15f1cf4fb0ecb8`
+  axios.get(url)
+    .then(function (response) {
+      console.log(response);
+    //取ってきた値を入れ込む
+  map = new Microsoft.Maps.Map("#map", {
+  center: {
+    latitude: lat,
+    longitude: lng,
+  },
+  zoom: 20,
+  });
+  //mapを表示した後にピンを立てる関数の実行
+  pushPin(lat, lng, map);
+  //Infoboxを生成する関数の実行
+  generateInfobox(lat, lng, map, response. data. weather[0]. main);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+  }
+
+
+
+//エラーの時
+function showError(error){
+  const errorMessage = [
+  "位置情報が許可されてません",
+  "現在位置を特定できません",
+  "位置情報を取得する前にタイムアウトになりました",
+  ];
+  alert(`error:${errorMessages[error.code - 1]}`);
+}
+
+  const option = {
+  enableHighAccuracy: true,
+  maximumAge: 20000,
+  timeout: 1000000,
+  }
+
+  window.onload = function () {
+  navigator.geolocation.getCurrentPosition(mapsInit, showError, option);
+};
+
+  </script>
+
+</body>
+
+</html>
